@@ -1,0 +1,71 @@
+from collections import deque
+
+def imprimir_labirinto(labirinto, caminho=None):
+    """Imprime o labirinto. Se tiver caminho, marca com '*'."""
+    labirinto_copy = [linha.copy() for linha in labirinto]
+
+    if caminho:
+        for x, y in caminho:
+            if labirinto_copy[x][y] == 0:
+                labirinto_copy[x][y] = '*'
+
+    for linha in labirinto_copy:
+        print(' '.join(str(c) for c in linha))
+    print()
+
+def encontrar_inicio(labirinto):
+    """Encontra a posição inicial 'S'."""
+    for i, linha in enumerate(labirinto):
+        for j, valor in enumerate(linha):
+            if valor == 'S':
+                return (i, j)
+    return None
+
+def bfs(labirinto, inicio):
+    """Busca em Largura para encontrar o caminho até 'F'."""
+    linhas = len(labirinto)
+    colunas = len(labirinto[0])
+    fila = deque()
+    fila.append((inicio, [inicio]))  # Guarda a posição atual e o caminho até ela
+    visitados = set()
+
+    while fila:
+        (x, y), caminho = fila.popleft()
+
+        if labirinto[x][y] == 'F':
+            return caminho  # Encontrou o destino
+
+        visitados.add((x, y))
+
+        # Movimentos possíveis: cima, baixo, esquerda, direita
+        for dx, dy in [(-1,0), (1,0), (0,-1), (0,1)]:
+            nx, ny = x + dx, y + dy
+            if 0 <= nx < linhas and 0 <= ny < colunas:
+                if (labirinto[nx][ny] == 0 or labirinto[nx][ny] == 'F') and (nx, ny) not in visitados:
+                    fila.append(((nx, ny), caminho + [(nx, ny)]))
+
+    return None  # Caminho não encontrado
+
+# --- Definição do labirinto ---
+labirinto = [
+    ['S', 0, 1, 0, 0, 0],
+    [1, 0, 1, 0, 1, 0],
+    [0, 0, 0, 0, 1, 0],
+    [0, 1, 1, 1, 0, 0],
+    [0, 0, 0, 1, 0, 'F']
+]
+
+# --- Programa principal ---
+print("Labirinto original:")
+imprimir_labirinto(labirinto)
+
+inicio = encontrar_inicio(labirinto)
+caminho = bfs(labirinto, inicio)
+
+if caminho:
+    print("Caminho encontrado:")
+    print(caminho)
+    print("\nLabirinto com o caminho marcado:")
+    imprimir_labirinto(labirinto, caminho)
+else:
+    print("Nenhum caminho encontrado.")
